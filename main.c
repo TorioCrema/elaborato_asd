@@ -4,20 +4,68 @@
 
 /* Struct for undirected graph */
 typedef struct {
-    char** map; /* the map of the graph '.'->empty '*'->wall */
-    int** distances /* the distance of every empty cell of the map */;
+    char* map; /* the map of the graph '.'->empty '*'->wall */
+    int* distances /* the distance of every empty cell of the map */;
+    int n;
+    int m;
 } Graph;
 
-/* Reads the map from file and returns it as is */
-char** generateMapFromFile(FILE *inputFile, int n, int m) {
-    char** map = (char**)malloc(sizeof(char) * n * m);
-    return NULL;
+int getIndex(int x, int y, Graph* graph) {
+    return x * graph->m + y;
+}
+
+int initGraph(Graph* graph) {
+    int i;
+    int o;
+    graph->map = (char*)malloc(graph->n * graph->m * sizeof(char));
+    graph->distances = (int*)malloc(graph->m * graph->n * sizeof(int));
+    if (graph->map == NULL || graph->distances == NULL) {
+        return 0;
+    } else {
+        for (i = 0; i < graph->n; i++) {
+            for (o = 0; o < graph->m; o++) {
+                graph->distances[getIndex(i, o, graph)] = -1;
+                fflush(stdout);
+            }
+        }
+        return 1;
+    }
+}
+
+void deleteGraph(Graph* graph) {
+    free(graph->map);
+    free(graph->distances);
+}
+
+/* Reads inputFile and saves the characters in the graph's map */
+void generateMapFromFile(FILE *inputFile, Graph* graph) {
+    int i;
+    int o;
+    char tmp;
+    for (i = 0; i < graph->n; i++) {
+        for (o = 0; o < graph->m; o++) {
+            /* read char and save into map at it's coords */
+            fscanf(inputFile, "%c", &graph->map[getIndex(i, o, graph)]);
+        }
+        /* read end of line */
+        fscanf(inputFile, "%c", &tmp);
+    }
+}
+
+/* Prints the graph's map */
+void printMap(Graph* graph) {
+    int i;
+    int o;
+    for (i = 0; i < graph->n; i++) {
+        for (o = 0; o < graph->m; o++) {
+            printf("%c", graph->map[getIndex(i, o, graph)]);
+        }
+        printf("\n");
+    }
 }
 
 int main(int argc, char** argv) {
     FILE* inputFile;
-    int n;
-    int m;
     Graph graph;
     if (argc == 2) {
         inputFile = fopen(argv[1], "r");
@@ -28,12 +76,20 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
     /* Read n and m from file */
-    if (2 != fscanf(inputFile, "%d %d\n", &n, &m)) {
+    if (2 != fscanf(inputFile, "%d%d ", &graph.n, &graph.m)) {
         return EXIT_FAILURE;
     }
-    assert(n > 0 && m > 0);
-    graph.map = generateMapFromFile(inputFile, n, m);
-    processMap(graph.map);
+    printf("%d %d\n", graph.n, graph.m);
+    assert(graph.n > 0);
+    assert(graph.m > 0);
+    initGraph(&graph);
+    fflush(stdout);
+    generateMapFromFile(inputFile, &graph);
+    fclose(inputFile);
+    printMap(&graph);
+    /*processMap(graph.map);*/
 
+    /* Remember to free malloc-ed memory! */
+    deleteGraph(&graph);
     return EXIT_SUCCESS;
 }
