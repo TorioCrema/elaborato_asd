@@ -5,7 +5,7 @@
 /* Struct for undirected graph */
 typedef struct {
     char* map; /* the map of the graph '.'->empty '*'->wall */
-    int* distances /* the distance of every empty cell of the map */;
+    int* distances /* the distance of every cell of the map from the source */;
     int n;
     int m;
 } Graph;
@@ -14,6 +14,10 @@ int getIndex(int x, int y, Graph* graph) {
     return x * graph->m + y;
 }
 
+/*
+    Allocates the memory needed to make use of the graph
+    and initializes it.
+*/
 int initGraph(Graph* graph) {
     int i;
     int o;
@@ -32,12 +36,17 @@ int initGraph(Graph* graph) {
     }
 }
 
+/*
+    Frees the memory allocated for the graph.
+*/
 void deleteGraph(Graph* graph) {
     free(graph->map);
     free(graph->distances);
 }
 
-/* Reads inputFile and saves the characters in the graph's map */
+/*
+    Reads inputFile and saves the characters in the graph's map.
+*/
 void generateMapFromFile(FILE *inputFile, Graph* graph) {
     int i;
     int o;
@@ -52,7 +61,9 @@ void generateMapFromFile(FILE *inputFile, Graph* graph) {
     }
 }
 
-/* Prints the graph's map */
+/*
+    Prints the graph's map
+*/
 void printMap(Graph* graph) {
     int i;
     int o;
