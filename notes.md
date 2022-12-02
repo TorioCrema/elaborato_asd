@@ -23,3 +23,7 @@ Expand wall by moving one block and checking 3x3 with with current block as cent
 Do Bfs on map with expanded walls.
 Check distance of destination if >= 0, it can be reached.
 Go back by finding previous node (the one that has distance == current distance - 1).
+
+## Input files
+
+[https://virtuale.unibo.it/mod/assign/view.php?id=800757]
