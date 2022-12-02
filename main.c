@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdbool.h>
+#define EMPTY '.'
 
 /* Struct for undirected graph */
 typedef struct {
@@ -47,7 +49,7 @@ void deleteGraph(Graph* graph) {
 /*
     Reads inputFile and saves the characters in the graph's map.
 */
-void generateMapFromFile(FILE *inputFile, Graph* graph) {
+void generateMapFromFile(FILE* inputFile, Graph* graph) {
     int i;
     int o;
     char tmp;
@@ -58,6 +60,38 @@ void generateMapFromFile(FILE *inputFile, Graph* graph) {
         }
         /* read end of line */
         fscanf(inputFile, "%c", &tmp);
+    }
+}
+
+/*
+    Returns true if the cell at the given coords is empty, false otherwise.
+*/
+bool isEmpty(int x, int y, Graph* graph) {
+    int i;
+    int o;
+    assert((x >= 1) && (x <= graph->n - 1));
+    assert((y >= 1) && (y <= graph->m - 1));
+    for (i = x - 1; i <= x + 1; i++) {
+        for (o = y - 1; o <= y + 1; o++) {
+            if (graph->map[getIndex(i, o, graph)] != EMPTY) {
+                return false;
+            }
+        }
+    }
+    return true;
+
+}
+
+/*
+    'Expands' the walls of the map so that it can be explored as a 3x3 entity.
+*/
+void processMap(Graph* graph) {
+    int i;
+    int o;
+    for (i = 1; i < graph->n - 1; i++) {
+        for (o = 1; o < graph->m - 1; o++) {
+            /*TODO*/
+        }
     }
 }
 
