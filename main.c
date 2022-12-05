@@ -359,6 +359,35 @@ bool bfs(Graph* graph, int s, int d) {
     return false;   
 }
 
+void printPath(int d, Graph* graph) {
+    Direction stepDir;
+    char dirToPrint;
+    if (graph->dist[d] == 0) {
+        return;
+    }
+    for (stepDir = 0; stepDir < 4; stepDir++) {
+        if (graph->dist[getNeighbour(d, stepDir, graph)] == graph->dist[d] - 1) {
+            printPath(getNeighbour(d, stepDir, graph), graph);
+            switch (stepDir)
+            {
+            case NORTH:
+                dirToPrint = 'S';
+                break;
+            case EAST:
+                dirToPrint = 'W';
+                break;
+            case SOUTH:
+                dirToPrint = 'N';
+                break;
+            default:
+                dirToPrint = 'E';
+                break;
+            }
+            printf("%c", dirToPrint);
+        }
+    }
+}
+
 int main(int argc, char** argv) {
     FILE* inputFile;
     Graph graph;
@@ -393,6 +422,7 @@ int main(int argc, char** argv) {
     printf("source: %d, dest:%d\n", source, destination);
     if (bfs(&graph, source, destination)) {
         printf("%d\n", graph.dist[destination]);
+        printPath(destination, &graph);
     }
 
     /* Remember to free malloc-ed memory! */
