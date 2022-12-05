@@ -14,6 +14,7 @@ typedef struct {
     int m;
 } Graph;
 
+/* Returns the index to use on the graph's map or distances arrays */
 int getIndex(int x, int y, Graph* graph) {
     assert((x >= 0) && (x < graph->n));
     assert((y >= 0) && (y < graph->m));
@@ -42,17 +43,13 @@ int initGraph(Graph* graph) {
     }
 }
 
-/*
-    Frees the memory allocated for the graph.
-*/
+/* Frees the memory allocated for the graph. */
 void deleteGraph(Graph* graph) {
     free(graph->map);
     free(graph->distances);
 }
 
-/*
-    Reads inputFile and saves the characters in the graph's map.
-*/
+/* Reads inputFile and saves the characters in the graph's map. */
 void generateMapFromFile(FILE* inputFile, Graph* graph) {
     int i;
     int o;
@@ -67,14 +64,10 @@ void generateMapFromFile(FILE* inputFile, Graph* graph) {
     }
 }
 
-/*
-    Returns true if the cell at the given coords is empty, false otherwise.
-*/
+/* Returns true if the cell at the given coords is empty, false otherwise. */
 bool isEmpty(int x, int y, Graph* graph) {
     int i;
     int o;
-    assert((x >= 1) && (x <= graph->n - 1));
-    assert((y >= 1) && (y <= graph->m - 1));
     for (i = x - 1; i <= x + 1; i++) {
         for (o = y - 1; o <= y + 1; o++) {
             if (graph->map[getIndex(i, o, graph)] == WALL) {
@@ -112,7 +105,8 @@ void processMap(Graph* graph) {
     int o;
     for (i = 1; i < graph->n - 1; i++) {
         for (o = 1; o < graph->m - 1; o++) {
-            if (graph->map[getIndex(i, o, graph)] == EMPTY && !isEmpty(i, o, graph)) {
+            if (graph->map[getIndex(i, o, graph)] == EMPTY
+                    && !isEmpty(i, o, graph)) {
                 graph->map[(getIndex(i, o, graph))] = EXPANDED_WALL;
             }
         }
@@ -154,7 +148,8 @@ int main(int argc, char** argv) {
     printf("%d %d\n", graph.n, graph.m);
     assert(graph.n > 0);
     assert(graph.m > 0);
-    initGraph(&graph);
+    if (!initGraph(&graph))
+        return EXIT_FAILURE;
     fflush(stdout);
     generateMapFromFile(inputFile, &graph);
     fclose(inputFile);
