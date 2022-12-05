@@ -152,7 +152,7 @@ void queue_print(const Queue *q)
 /* Struct for undirected graph */
 typedef struct {
     char* map; /* the map of the graph '.'->empty '*'->wall */
-    int* distances /* the distance of every cell of the map from the source */;
+    int* dist /* the distance of every cell of the map from the source */;
     int n;
     int m;
 } Graph;
@@ -172,13 +172,13 @@ int initGraph(Graph* graph) {
     int i;
     int o;
     graph->map = (char*)malloc(graph->n * graph->m * sizeof(char));
-    graph->distances = (int*)malloc(graph->m * graph->n * sizeof(int));
-    if (graph->map == NULL || graph->distances == NULL) {
+    graph->dist = (int*)malloc(graph->m * graph->n * sizeof(int));
+    if (graph->map == NULL || graph->dist == NULL) {
         return 0;
     } else {
         for (i = 0; i < graph->n; i++) {
             for (o = 0; o < graph->m; o++) {
-                graph->distances[getIndex(i, o, graph)] = -1;
+                graph->dist[getIndex(i, o, graph)] = -1;
             }
         }
         return 1;
@@ -188,7 +188,7 @@ int initGraph(Graph* graph) {
 /* Frees the memory allocated for the graph. */
 void deleteGraph(Graph* graph) {
     free(graph->map);
-    free(graph->distances);
+    free(graph->dist);
 }
 
 /* Reads inputFile and saves the characters in the graph's map. */
@@ -307,23 +307,42 @@ int getNeighbour(const int x, const Direction direction, Graph* graph) {
     return neighbour;
 }
 
+/* Returns true if the cell at the given index was visited, false otherwise. */
+bool wasVisited(const int index, const Graph* graph) {
+    if (graph->dist[index] >= 0)
+        return true;
+    return false;
+}
+
 /*  Explores the graph through the BFS algorithm, starting from
     the source s. Returns true if the destination d was reached. */
 bool bfs(const Graph* graph, int s, int d) {
     Queue* q;
+    int currCell;
+    int currNeighbour;
     int i;
     q = queue_create();
-    graph->distances[s] = 0;
+    graph->dist[s] = 0;
     queue_enqueue(q, s);
     while (!queue_is_empty(q)) {
-        const int currCell = queue_dequeue(q);
+        currCell = queue_dequeue(q);
         /* For every cell next to the current one (for every Direction). */
         for (i = 0; i < 4; i++) {
-            /* TODO */
+            currNeighbour = getNeighbour(currCell, i, graph);
+            if (!wasVisited(graph->map[currNeighbour], graph)) {
+                /* If the current neighbour wasn't visited already. */
+                if (graph->map[currNeighbour] == EMPTY) {
+                    graph->dist[currNeighbour] = graph->dist[currCell] + 1;
+                    queue_enqueue(q, currNeighbour);
+                }
+            }
         }
     }
-    
-    return 0;
+    queue_destroy(q);
+    if (wasVisited(d, graph)) {
+        return true;
+    }
+    return false;   
 }
 
 int main(int argc, char** argv) {
