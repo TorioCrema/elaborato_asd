@@ -8,7 +8,6 @@
 #define EXPANDED_WALL 'x'
 
 typedef enum { NORTH, EAST, SOUTH, WEST } Direction;
-
 typedef struct {
     int capacity;
     int head, tail;
@@ -272,6 +271,17 @@ void printMap(Graph* graph) {
     }
 }
 
+void printDist(Graph* graph) {
+    int i;
+    int o;
+    for (i = 0; i < graph->n; i++) {
+        for (o = 0; o < graph->m; o++) {
+            printf("%d ", graph->dist[getIndex(i, o, graph)]);
+        }
+        printf("\n");
+    }
+}
+
 /* Returns the index of the neighbouring cell of x in the given Direction.
 Returns -1 if the direction given is not valid. */
 int getNeighbour(const int x, const Direction direction, Graph* graph) {
@@ -308,7 +318,7 @@ int getNeighbour(const int x, const Direction direction, Graph* graph) {
 }
 
 /* Returns true if the cell at the given index was visited, false otherwise. */
-bool wasVisited(const int index, const Graph* graph) {
+bool wasVisited(const int index, Graph* graph) {
     if (graph->dist[index] >= 0)
         return true;
     return false;
@@ -316,20 +326,24 @@ bool wasVisited(const int index, const Graph* graph) {
 
 /*  Explores the graph through the BFS algorithm, starting from
     the source s. Returns true if the destination d was reached. */
-bool bfs(const Graph* graph, int s, int d) {
+bool bfs(Graph* graph, int s, int d) {
     Queue* q;
     int currCell;
     int currNeighbour;
     int i;
+    int test = 0;
     q = queue_create();
     graph->dist[s] = 0;
     queue_enqueue(q, s);
     while (!queue_is_empty(q)) {
+        test++;
         currCell = queue_dequeue(q);
         /* For every cell next to the current one (for every Direction). */
         for (i = 0; i < 4; i++) {
             currNeighbour = getNeighbour(currCell, i, graph);
-            if (!wasVisited(graph->map[currNeighbour], graph)) {
+            printf("currCell: %d, currNeighbour: %d\n", currCell, currNeighbour);
+            fflush(stdout);
+            if (!wasVisited(currNeighbour, graph)) {
                 /* If the current neighbour wasn't visited already. */
                 if (graph->map[currNeighbour] == EMPTY) {
                     graph->dist[currNeighbour] = graph->dist[currCell] + 1;
@@ -337,6 +351,9 @@ bool bfs(const Graph* graph, int s, int d) {
                 }
             }
         }
+        printDist(graph);
+        printf("\n");
+        fflush(stdout);
     }
     queue_destroy(q);
     if (wasVisited(d, graph)) {
@@ -348,6 +365,8 @@ bool bfs(const Graph* graph, int s, int d) {
 int main(int argc, char** argv) {
     FILE* inputFile;
     Graph graph;
+    int source;
+    int destination;
     if (argc == 2) {
         inputFile = fopen(argv[1], "r");
         if (inputFile == NULL) {
@@ -372,6 +391,13 @@ int main(int argc, char** argv) {
     processMap(&graph);
     printf("\n");
     printMap(&graph);
+    source = graph.m + 1;
+    destination = graph.m * (graph.n - 1) - 1;
+    printf("source: %d, dest:%d\n", source, destination);
+    printDist(&graph);
+    if (bfs(&graph, source, destination)) {
+        printf("Destination reached.\n");
+    }
 
     /* Remember to free malloc-ed memory! */
     deleteGraph(&graph);
