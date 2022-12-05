@@ -2,9 +2,136 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <string.h>
 #define EMPTY '.'
 #define WALL '*'
 #define EXPANDED_WALL 'x'
+
+typedef struct {
+    int capacity;
+    int head, tail;
+    int *data;
+} Queue;
+
+/* Creates an epty queue. */
+Queue *queue_create( void )
+{
+    Queue *q = (Queue*)malloc(sizeof(*q));
+    assert(q != NULL);
+
+    q->capacity = 2;
+    q->data = (int*)malloc(q->capacity * sizeof(*(q->data)));
+    assert(q->data != NULL);
+    q->head = q->tail = 0;
+    return q;
+}
+
+/* Frees the space previously allocated for the queue. */
+void queue_destroy( Queue *q )
+{
+    assert(q != NULL);
+
+    free(q->data);
+    q->data = NULL;
+    q->head = q->tail = -1;
+    q->capacity = 0;
+    free(q);
+}
+
+/* Returns the number of elemets in the queue. */
+int queue_size( const Queue *q )
+{
+    assert(q != NULL);
+
+    if (q->head <= q->tail) {
+        return (q->tail - q->head);
+    } else {
+        return (q->capacity - (q->head - q->tail));
+    }
+}
+
+/* Returns true (nonzero) if and only if the queue is empty. */
+static int queue_is_full( const Queue *q )
+{
+    assert(q != NULL);
+
+    /* return q->head == ((q->tail + 1) % q->capacity); */
+    return (queue_size(q) == (q->capacity - 1));
+}
+
+int queue_is_empty( const Queue *q )
+{
+    assert(q != NULL);
+
+    return q->tail == q->head;
+}
+
+/*  Resizes the buffer of the queue q to the new dimension new_capaticy.
+    All the data is copied for the old buffer to the new one. */
+static void queue_resize( Queue *q, int new_capacity )
+{
+    int cur_size, cur_capacity;
+    int *new_data;
+
+    assert(q != NULL);
+    cur_size = queue_size(q);
+    assert( new_capacity >= cur_size );
+    cur_capacity = q->capacity;
+    new_data = (int*)malloc(new_capacity * sizeof(int));
+    assert(new_data != NULL);
+    /* Copy the old data from the old buffer to the new one */
+    if (q->head <= q->tail) {
+        /* If the all the data is within a continuos segment of
+           the array, we can copy once */
+        memcpy(new_data,
+               q->data + q->head,
+               cur_size * sizeof(int));
+    } else {
+        /* If the data is saved in two segments, we must make use
+           of two different copy operations */
+        memcpy(new_data,
+               q->data + q->head,
+               (cur_capacity - q->head) * sizeof(int));
+        memcpy(new_data + (cur_capacity - q->head),
+               q->data,
+               q->tail * sizeof(int));
+    }
+    free(q->data);
+    q->capacity = new_capacity;
+    q->data = new_data;
+    q->head = 0;
+    q->tail = cur_size;
+}
+
+/* Add the value val to the queue q */
+void queue_enqueue( Queue *q, int val )
+{
+    assert(q != NULL);
+
+    if (queue_is_full(q)) {
+        queue_resize(q, q->capacity * 2);
+    }
+
+    q->data[q->tail] = val;
+    q->tail = (q->tail + 1) % q->capacity;
+}
+
+/* Removes and returns the first element of the queue */
+int queue_dequeue( Queue *q )
+{
+    int result;
+
+    assert(q != NULL);
+    assert( ! queue_is_empty(q) );
+
+    result = q->data[q->head];
+    q->head = (q->head + 1) % q->capacity;
+
+    if (queue_size(q) <= q->capacity / 4) {
+        queue_resize(q, q->capacity / 2);
+    }
+    return result;
+}
 
 /* Struct for undirected graph */
 typedef struct {
