@@ -7,6 +7,8 @@
 #define WALL '*'
 #define EXPANDED_WALL 'x'
 
+typedef enum { NORTH, EAST, SOUTH, WEST } Direction;
+
 typedef struct {
     int capacity;
     int head, tail;
@@ -268,6 +270,59 @@ void printMap(Graph* graph) {
         }
         printf("\n");
     }
+}
+
+/* Returns the index of the neighbouring cell of x in the given Direction. */
+int getNeighbour(const int x, const Direction direction, Graph* graph) {
+    int neighbour;
+    switch (direction) {
+    case NORTH:
+        neighbour = x - graph->m;
+        /* Can't go north from the first row of the map. */
+        assert(neighbour >= 0);
+        break;
+    case EAST:
+        /* Can't go east from the last column of the map. */
+        assert(x % graph->m != graph->m - 1);
+        neighbour = x + 1;
+        assert(neighbour < graph->n * graph->m);
+        break;
+    case SOUTH:
+        neighbour = x + graph->m;
+        /* Can't go south from the last row of the map. */
+        assert(neighbour < graph->n * graph->m);
+        break;
+    case WEST:
+        /* Can't go west from the first column of the map. */
+        assert(x % graph->m != 0);
+        neighbour = x - 1;
+        assert(neighbour >= 0);
+        break;
+    default:
+        /* Called function with unexpected direction. */
+        neighbour = -1;
+        break;
+    }
+    return neighbour;
+}
+
+/*  Explores the graph through the BFS algorithm, starting from
+    the source s. Returns true if the destination d was reached. */
+bool bfs(const Graph* graph, int s, int d) {
+    Queue* q;
+    int i;
+    q = queue_create();
+    graph->distances[s] = 0;
+    queue_enqueue(q, s);
+    while (!queue_is_empty(q)) {
+        const int currCell = queue_dequeue(q);
+        /* For every cell next to the current one (for every Direction). */
+        for (i = 0; i < 4; i++) {
+            /* TODO */
+        }
+    }
+    
+    return 0;
 }
 
 int main(int argc, char** argv) {
