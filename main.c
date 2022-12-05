@@ -272,7 +272,8 @@ void printMap(Graph* graph) {
     }
 }
 
-/* Returns the index of the neighbouring cell of x in the given Direction. */
+/* Returns the index of the neighbouring cell of x in the given Direction.
+Returns -1 if the direction given is not valid. */
 int getNeighbour(const int x, const Direction direction, Graph* graph) {
     int neighbour;
     switch (direction) {
