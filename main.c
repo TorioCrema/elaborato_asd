@@ -133,6 +133,20 @@ int queue_dequeue( Queue *q )
     return result;
 }
 
+/* Prints the contents of the queue q. */
+void queue_print(const Queue *q)
+{
+    int i;
+
+    assert(q != NULL);
+
+    printf("HEAD << ");
+    for (i=q->head; i != q->tail; i = (i+1) % q->capacity) {
+        printf("%d ", q->data[i]);
+    }
+    printf("<< TAIL\n");
+}
+
 /* Struct for undirected graph */
 typedef struct {
     char* map; /* the map of the graph '.'->empty '*'->wall */
