@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <stdbool.h>
 #define EMPTY '.'
+#define WALL '*'
+#define EXPANDED_WALL 'x'
 
 /* Struct for undirected graph */
 typedef struct {
@@ -13,6 +15,8 @@ typedef struct {
 } Graph;
 
 int getIndex(int x, int y, Graph* graph) {
+    assert((x >= 0) && (x < graph->n));
+    assert((y >= 0) && (y < graph->m));
     return x * graph->m + y;
 }
 
@@ -73,7 +77,7 @@ bool isEmpty(int x, int y, Graph* graph) {
     assert((y >= 1) && (y <= graph->m - 1));
     for (i = x - 1; i <= x + 1; i++) {
         for (o = y - 1; o <= y + 1; o++) {
-            if (graph->map[getIndex(i, o, graph)] != EMPTY) {
+            if (graph->map[getIndex(i, o, graph)] == WALL) {
                 return false;
             }
         }
@@ -82,22 +86,45 @@ bool isEmpty(int x, int y, Graph* graph) {
 
 }
 
-/*
-    'Expands' the walls of the map so that it can be explored as a 3x3 entity.
-*/
+/* Fills row at index x with walls */
+void fillRow(int x, Graph* graph) {
+    int o;
+    for (o = 0; o < graph->m; o++) {
+        if (graph->map[getIndex(x, o, graph)] == EMPTY) {
+            graph->map[getIndex(x, o, graph)] = EXPANDED_WALL;
+        }
+    }
+}
+
+/* Fills column at index y with walls */
+void fillColumn(int y, Graph* graph) {
+    int i;
+    for (i = 0; i < graph->n - 1; i++) {
+        if (graph->map[getIndex(i, y, graph)] == EMPTY) {
+            graph->map[getIndex(i, y, graph)] = EXPANDED_WALL;
+        }
+    }
+}
+
+/* 'Expands' the walls of the map so that it can be explored as a 3x3 entity. */
 void processMap(Graph* graph) {
     int i;
     int o;
     for (i = 1; i < graph->n - 1; i++) {
         for (o = 1; o < graph->m - 1; o++) {
-            /*TODO*/
+            if (graph->map[getIndex(i, o, graph)] == EMPTY && !isEmpty(i, o, graph)) {
+                graph->map[(getIndex(i, o, graph))] = EXPANDED_WALL;
+            }
         }
     }
+    /* Fill edges of the map */
+    fillRow(0, graph);
+    fillRow(graph->n - 1, graph);
+    fillColumn(0, graph);
+    fillColumn(graph->m - 1, graph);
 }
 
-/*
-    Prints the graph's map
-*/
+/* Prints the graph's map */
 void printMap(Graph* graph) {
     int i;
     int o;
@@ -132,7 +159,9 @@ int main(int argc, char** argv) {
     generateMapFromFile(inputFile, &graph);
     fclose(inputFile);
     printMap(&graph);
-    /*processMap(graph.map);*/
+    processMap(&graph);
+    printf("\n");
+    printMap(&graph);
 
     /* Remember to free malloc-ed memory! */
     deleteGraph(&graph);
