@@ -359,6 +359,7 @@ bool bfs(Graph* graph, int s, int d) {
     return false;   
 }
 
+/* Prints the steps taken to reach the destination from the source. */
 void printPath(int d, Graph* graph) {
     Direction stepDir;
     char dirToPrint;
@@ -366,10 +367,10 @@ void printPath(int d, Graph* graph) {
         return;
     }
     for (stepDir = 0; stepDir < 4; stepDir++) {
-        if (graph->dist[getNeighbour(d, stepDir, graph)] == graph->dist[d] - 1) {
+        /* Find the previous cell in the path. */
+        if (graph->dist[getNeighbour(d, stepDir, graph)] == graph->dist[d]-1) {
             printPath(getNeighbour(d, stepDir, graph), graph);
-            switch (stepDir)
-            {
+            switch (stepDir) {
             case NORTH:
                 dirToPrint = 'S';
                 break;
