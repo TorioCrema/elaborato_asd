@@ -36,7 +36,6 @@ int initGraph(Graph* graph) {
         for (i = 0; i < graph->n; i++) {
             for (o = 0; o < graph->m; o++) {
                 graph->distances[getIndex(i, o, graph)] = -1;
-                fflush(stdout);
             }
         }
         return 1;
