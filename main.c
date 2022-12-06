@@ -271,6 +271,7 @@ void printMap(Graph* graph) {
     }
 }
 
+/* Prints the graph's distances matrix. */
 void printDist(Graph* graph) {
     int i;
     int o;
@@ -326,14 +327,12 @@ bool wasVisited(const int index, Graph* graph) {
 
 /*  Explores the graph through the BFS algorithm, starting from
     the source s. Returns true if the destination d was reached. */
-bool bfs(Graph* graph, int s, int d) {
+void bfs(Graph* graph, int s, int d) {
     Queue* q;
     int currCell;
     int currNeighbour;
     int i;
     int test = 0;
-    printf("Starting bfs with s: %d, d:%d\n", s, d);
-    fflush(stdout);
     q = queue_create();
     graph->dist[s] = 0;
     queue_enqueue(q, s);
@@ -353,10 +352,6 @@ bool bfs(Graph* graph, int s, int d) {
         }
     }
     queue_destroy(q);
-    if (wasVisited(d, graph)) {
-        return true;
-    }
-    return false;   
 }
 
 /* Prints the steps taken to reach the destination from the source. */
@@ -385,6 +380,7 @@ void printPath(int d, Graph* graph) {
                 break;
             }
             printf("%c", dirToPrint);
+            break;
         }
     }
 }
@@ -406,7 +402,7 @@ int main(int argc, char** argv) {
     if (2 != fscanf(inputFile, "%d%d ", &graph.n, &graph.m)) {
         return EXIT_FAILURE;
     }
-    printf("%d %d\n", graph.n, graph.m);
+    /*printf("%d %d\n", graph.n, graph.m);*/
     assert(graph.n > 0);
     assert(graph.m > 0);
     if (!initGraph(&graph))
@@ -414,15 +410,16 @@ int main(int argc, char** argv) {
     fflush(stdout);
     generateMapFromFile(inputFile, &graph);
     fclose(inputFile);
-    printMap(&graph);
+    /*printMap(&graph);*/
     processMap(&graph);
-    printf("\n");
-    printMap(&graph);
+    /*printf("\n");
+    printMap(&graph);*/
     source = getIndex(1, 1, &graph);
     destination = getIndex(graph.n - 2, graph.m - 2, &graph);
-    printf("source: %d, dest:%d\n", source, destination);
-    if (bfs(&graph, source, destination)) {
-        printf("%d\n", graph.dist[destination]);
+    /*printf("source: %d, dest:%d\n", source, destination);*/
+    bfs(&graph, source, destination);
+    printf("%d\n", graph.dist[destination]);
+    if (graph.dist[destination] >= 0) {
         printPath(destination, &graph);
     }
 
