@@ -402,6 +402,7 @@ int main(int argc, char** argv) {
     Graph graph;
     int source;
     int destination;
+    /* Check that the program was started correctly. */
     if (argc == 2) {
         inputFile = fopen(argv[1], "r");
         if (inputFile == NULL) {
@@ -410,19 +411,23 @@ int main(int argc, char** argv) {
     } else {
         return EXIT_FAILURE;
     }
-    /* Read n and m from file */
+    /* Read n and m from file. */
     if (2 != fscanf(inputFile, "%d%d ", &graph.n, &graph.m)) {
         return EXIT_FAILURE;
     }
     assert(graph.n > 0);
     assert(graph.m > 0);
+    /* Initialize graph */
     if (!initGraph(&graph))
         return EXIT_FAILURE;
+    /* Read file and save the map. */
     generateMapFromFile(inputFile, &graph);
     fclose(inputFile);
     processMap(&graph);
+    /* Calculate the index of the source and the destination. */
     source = getIndex(1, 1, &graph);
     destination = getIndex(graph.n - 2, graph.m - 2, &graph);
+    /* Explore the map with bfs. */
     bfs(&graph, source);
     /* Print the distance between destination and source, -1 if unreachable. */
     printf("%d\n", graph.dist[destination]);
@@ -431,7 +436,7 @@ int main(int argc, char** argv) {
         printPath(destination, &graph);
     }
 
-    /* Remember to free malloc-ed memory! */
+    /* Free memory allocated for the graph. */
     deleteGraph(&graph);
     return EXIT_SUCCESS;
 }
