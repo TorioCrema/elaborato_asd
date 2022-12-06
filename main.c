@@ -98,7 +98,7 @@ int queue_size( const Queue *q )
 }
 
 /* Returns true (nonzero) if and only if the queue is full. */
-static int queue_is_full( const Queue *q )
+int queue_is_full( const Queue *q )
 {
     assert(q != NULL);
 
@@ -116,7 +116,7 @@ int queue_is_empty( const Queue *q )
 
 /*  Resizes the buffer of the queue q to the new dimension new_capaticy.
     All the data is copied for the old buffer to the new one. */
-static void queue_resize( Queue *q, int new_capacity )
+void queue_resize( Queue *q, int new_capacity )
 {
     int cur_size, cur_capacity;
     int *new_data;
@@ -299,7 +299,7 @@ void processMap(Graph* graph) {
 
 /* Returns the index of the neighbouring cell of x in the given Direction.
 Returns -1 if the direction given is not valid. */
-int getNeighbour(const int x, const Direction direction, Graph* graph) {
+int getNeighbour(int x, Direction direction, Graph* graph) {
     int neighbour;
     switch (direction) {
     case NORTH:
@@ -333,7 +333,7 @@ int getNeighbour(const int x, const Direction direction, Graph* graph) {
 }
 
 /* Returns true if the cell at the given index was visited, false otherwise. */
-bool wasVisited(const int index, Graph* graph) {
+bool wasVisited(int index, Graph* graph) {
     return graph->dist[index] >= 0;
 }
 
