@@ -1,3 +1,46 @@
+/*
+This program uses the BFS algorithm to find the shortest path that a 3x3 virtual
+robot would have to follow to go from the top-left corner to the bottom-right
+corner of a map while avoiding obstacles.
+It takes a filename as input, this file's first line must indicate the map's
+size; for example with a map with 15 rows and 20 columns the first line will
+be "15 20" followed by a new line.
+The next 'n' lines of the file must contain the rows of the map where '.'
+indicates an empty space and '*' indicates a wall.
+In order to explore the map we first modify it by changing an empty space that
+has a wall in any of the cells close to it (even diagonally) with 'x'.
+We also fill the edges of the map.
+At the end of this process a map that looked like this:
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . * * . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . . . . .
+. . . . . * . . .
+. . . . * * . . .
+Will look like this:
+X X X X X X X X X
+X . . . . . . . X
+X . . X X X X . X
+X . . X * * X . X
+X . . X X X X . X
+X . . . . . . . X
+X . . . X X X . X
+X . . X X * X . X
+X X X X * * X X X
+By doing this we can move around the map, starting from the coordinate (1, 1),
+and explore it without looking at the cells close to the one we are moving to,
+and behave just like a 3x3 entity that has our starting cell as it's center
+would while exploring the map.
+After this we explore the map through the bfs algorithm, we use a struct called
+Graph where we save the altered map as an array, it's size and an array called
+'dist' where we keep track of every cell's distance from the source and
+ititialize it to -1 at the start; a cell's distance is also use to determine
+whether it was visited by the algoritm already (if the distance is >= 0
+the cell was visited).
+*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -292,8 +335,8 @@ bool wasVisited(const int index, Graph* graph) {
 }
 
 /*  Explores the graph through the BFS algorithm, starting from
-    the source s. Returns true if the destination d was reached. */
-void bfs(Graph* graph, int s, int d) {
+    the source s. */
+void bfs(Graph* graph, int s) {
     Queue* q;
     int currCell;
     int currNeighbour;
@@ -377,7 +420,7 @@ int main(int argc, char** argv) {
     processMap(&graph);
     source = getIndex(1, 1, &graph);
     destination = getIndex(graph.n - 2, graph.m - 2, &graph);
-    bfs(&graph, source, destination);
+    bfs(&graph, source);
     /* Print the distance between destination and source, -1 if unreachable. */
     printf("%d\n", graph.dist[destination]);
     if (graph.dist[destination] >= 0) {
