@@ -51,7 +51,7 @@ int queue_size( const Queue *q )
     }
 }
 
-/* Returns true (nonzero) if and only if the queue is empty. */
+/* Returns true (nonzero) if and only if the queue is full. */
 static int queue_is_full( const Queue *q )
 {
     assert(q != NULL);
@@ -60,6 +60,7 @@ static int queue_is_full( const Queue *q )
     return (queue_size(q) == (q->capacity - 1));
 }
 
+/* Returns true (nonzero) if and only if the queue is empty. */
 int queue_is_empty( const Queue *q )
 {
     assert(q != NULL);
@@ -134,20 +135,6 @@ int queue_dequeue( Queue *q )
     return result;
 }
 
-/* Prints the contents of the queue q. */
-void queue_print(const Queue *q)
-{
-    int i;
-
-    assert(q != NULL);
-
-    printf("HEAD << ");
-    for (i=q->head; i != q->tail; i = (i+1) % q->capacity) {
-        printf("%d ", q->data[i]);
-    }
-    printf("<< TAIL\n");
-}
-
 /* Struct for undirected graph */
 typedef struct {
     char* map; /* the map of the graph '.'->empty '*'->wall */
@@ -175,6 +162,7 @@ int initGraph(Graph* graph) {
     if (graph->map == NULL || graph->dist == NULL) {
         return 0;
     } else {
+        /* Set all distances to -1 before the map is exlored. */
         for (i = 0; i < graph->n; i++) {
             for (o = 0; o < graph->m; o++) {
                 graph->dist[getIndex(i, o, graph)] = -1;
@@ -205,7 +193,8 @@ void generateMapFromFile(FILE* inputFile, Graph* graph) {
     }
 }
 
-/* Returns true if the cell at the given coords is empty, false otherwise. */
+/* Returns true if the cell at the given coords isn't close to any walls,
+false otherwise. */
 bool isEmpty(int x, int y, Graph* graph) {
     int i;
     int o;
@@ -220,7 +209,7 @@ bool isEmpty(int x, int y, Graph* graph) {
 
 }
 
-/* Fills row at index x with walls */
+/* Fills row at index x with walls. */
 void fillRow(int x, Graph* graph) {
     int o;
     for (o = 0; o < graph->m; o++) {
@@ -230,7 +219,7 @@ void fillRow(int x, Graph* graph) {
     }
 }
 
-/* Fills column at index y with walls */
+/* Fills column at index y with walls. */
 void fillColumn(int y, Graph* graph) {
     int i;
     for (i = 0; i < graph->n - 1; i++) {
@@ -240,7 +229,10 @@ void fillColumn(int y, Graph* graph) {
     }
 }
 
-/* 'Expands' the walls of the map so that it can be explored as a 3x3 entity. */
+/* Fills an EMPTY cell that is next to a WALL (in any direction,
+even diagonally) with a new char so that the new map can be explored with a
+single cell as a 3x3 entity would explore the old one, with the single
+cell at it's center. */
 void processMap(Graph* graph) {
     int i;
     int o;
@@ -257,30 +249,6 @@ void processMap(Graph* graph) {
     fillRow(graph->n - 1, graph);
     fillColumn(0, graph);
     fillColumn(graph->m - 1, graph);
-}
-
-/* Prints the graph's map */
-void printMap(Graph* graph) {
-    int i;
-    int o;
-    for (i = 0; i < graph->n; i++) {
-        for (o = 0; o < graph->m; o++) {
-            printf("%c", graph->map[getIndex(i, o, graph)]);
-        }
-        printf("\n");
-    }
-}
-
-/* Prints the graph's distances matrix. */
-void printDist(Graph* graph) {
-    int i;
-    int o;
-    for (i = 0; i < graph->n; i++) {
-        for (o = 0; o < graph->m; o++) {
-            printf("%d ", graph->dist[getIndex(i, o, graph)]);
-        }
-        printf("\n");
-    }
 }
 
 /* Returns the index of the neighbouring cell of x in the given Direction.
@@ -320,9 +288,7 @@ int getNeighbour(const int x, const Direction direction, Graph* graph) {
 
 /* Returns true if the cell at the given index was visited, false otherwise. */
 bool wasVisited(const int index, Graph* graph) {
-    if (graph->dist[index] >= 0)
-        return true;
-    return false;
+    return graph->dist[index] >= 0;
 }
 
 /*  Explores the graph through the BFS algorithm, starting from
@@ -332,12 +298,10 @@ void bfs(Graph* graph, int s, int d) {
     int currCell;
     int currNeighbour;
     int i;
-    int test = 0;
     q = queue_create();
     graph->dist[s] = 0;
     queue_enqueue(q, s);
     while (!queue_is_empty(q)) {
-        test++;
         currCell = queue_dequeue(q);
         /* For every cell next to the current one (for every Direction). */
         for (i = 0; i < 4; i++) {
@@ -380,6 +344,8 @@ void printPath(int d, Graph* graph) {
                 break;
             }
             printf("%c", dirToPrint);
+            /* There could be multiple valid paths, break here to avoid
+               printing all of them. */
             break;
         }
     }
@@ -402,24 +368,20 @@ int main(int argc, char** argv) {
     if (2 != fscanf(inputFile, "%d%d ", &graph.n, &graph.m)) {
         return EXIT_FAILURE;
     }
-    /*printf("%d %d\n", graph.n, graph.m);*/
     assert(graph.n > 0);
     assert(graph.m > 0);
     if (!initGraph(&graph))
         return EXIT_FAILURE;
-    fflush(stdout);
     generateMapFromFile(inputFile, &graph);
     fclose(inputFile);
-    /*printMap(&graph);*/
     processMap(&graph);
-    /*printf("\n");
-    printMap(&graph);*/
     source = getIndex(1, 1, &graph);
     destination = getIndex(graph.n - 2, graph.m - 2, &graph);
-    /*printf("source: %d, dest:%d\n", source, destination);*/
     bfs(&graph, source, destination);
+    /* Print the distance between destination and source, -1 if unreachable. */
     printf("%d\n", graph.dist[destination]);
     if (graph.dist[destination] >= 0) {
+        /* If the destination is reachable print the path to reach it. */
         printPath(destination, &graph);
     }
 
