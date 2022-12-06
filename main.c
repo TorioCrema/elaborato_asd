@@ -1,4 +1,7 @@
 /*
+
+Simone Zama 0000989981 B simone.zama@studio.unibo.it
+
 This program uses the BFS algorithm to find the shortest path that a 3x3 virtual
 robot would have to follow to go from the top-left corner to the bottom-right
 corner of a map while avoiding obstacles.
